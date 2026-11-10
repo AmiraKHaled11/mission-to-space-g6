@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mission to Space - Grade 6 Quiz 2</title>
+<style>
+:root{--bg:#030617;--panel:rgba(14,22,56,.82);--panel2:#16224f;--line:#2c3c80;--cyan:#41e8ff;--pink:#ff4fd8;--gold:#ffcf4a;--green:#38e39b;--red:#ff5d73;--grey:#a9b6e0;--white:#fff}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:#fff;font-family:"Segoe UI",Arial,sans-serif}
+body{overflow-x:hidden}
+#sky{position:fixed;inset:0;z-index:0}
+.screen{position:relative;z-index:1;min-height:100vh;display:none;padding:14px 16px 24px;max-width:1280px;margin:0 auto}
+.screen.on{display:block}
+button{font:inherit;cursor:pointer;border:0;border-radius:14px;font-weight:700}
+.btn{background:var(--cyan);color:#041030;padding:12px 22px;font-size:19px;box-shadow:0 0 18px rgba(65,232,255,.45)}
+.btn.gold{background:var(--gold);box-shadow:0 0 18px rgba(255,207,74,.45)}
+.btn.ghost{background:var(--panel2);color:#fff;border:1px solid var(--line);box-shadow:none}
+.btn:disabled{opacity:.4;cursor:default}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.brand{font-weight:800;letter-spacing:2px;color:var(--cyan);font-size:15px}
+.pill{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:5px 12px;font-weight:700;font-size:14px;white-space:nowrap}
+.pill.gold{color:var(--gold);border-color:var(--gold)}
+.sp{flex:1}
+.iconbtn{background:var(--panel);border:1px solid var(--line);color:#fff;border-radius:99px;padding:6px 12px;font-size:14px}
+#prog{height:10px;background:var(--panel2);border-radius:99px;overflow:hidden;border:1px solid var(--line);margin-bottom:12px}
+#progfill{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--pink));transition:width .6s}
+/* intro */
+#intro{display:none;text-align:center;padding-top:6vh}
+#intro.on{display:block}
+.title{font-size:clamp(38px,7vw,84px);font-weight:900;letter-spacing:3px;margin:8px 0 0;text-shadow:0 0 30px rgba(65,232,255,.6)}
+.sub{font-size:clamp(18px,2.6vw,28px);color:var(--cyan);font-weight:700}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px;backdrop-filter:blur(4px)}
+#entry{max-width:520px;margin:22px auto 0;text-align:left}
+#entry label{display:block;font-weight:700;color:var(--grey);margin:8px 0 4px}
+#entry input,#entry select{width:100%;font:inherit;font-size:20px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0b1336;color:#fff}
+#count{position:fixed;inset:0;z-index:5;display:none;align-items:center;justify-content:center;flex-direction:column;background:radial-gradient(circle at 50% 70%,rgba(255,120,40,.18),transparent 60%)}
+#count.on{display:flex}
+#cnum{font-size:min(38vw,300px);font-weight:900;color:#fff;text-shadow:0 0 40px var(--cyan)}
+#rocket{position:fixed;left:50%;bottom:-10px;transform:translateX(-50%);width:120px;z-index:6;display:none}
+#rocket.go{display:block;animation:lift 2.6s cubic-bezier(.55,0,.8,.4) forwards}
+@keyframes lift{0%{transform:translate(-50%,0)}15%{transform:translate(-51%,-6px)}25%{transform:translate(-49%,-4px)}100%{transform:translate(-50%,-130vh)}}
+.shake{animation:shake .12s infinite}
+@keyframes shake{0%{transform:translate(1px,1px)}50%{transform:translate(-2px,0)}100%{transform:translate(1px,-1px)}}
+/* guide */
+.guide{display:flex;gap:12px;align-items:flex-end}
+.guide svg{width:96px;height:110px;flex:0 0 auto;filter:drop-shadow(0 0 10px rgba(65,232,255,.4))}
+.bubble{position:relative;background:#f4f7ff;color:#101a44;border-radius:18px;padding:12px 16px;font-size:18px;line-height:1.35;flex:1;min-height:60px}
+.bubble:before{content:"";position:absolute;left:-10px;bottom:20px;border:10px solid transparent;border-right-color:#f4f7ff;border-left:0}
+.bubble b{color:#7a1fa8}
+/* map */
+#map{position:relative;height:min(64vh,560px);margin-top:10px}
+#mapsvg{position:absolute;inset:0;width:100%;height:100%}
+.planet{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;background:none;color:#fff;padding:0}
+.orb{width:clamp(58px,8vw,92px);height:clamp(58px,8vw,92px);border-radius:50%;box-shadow:0 0 22px var(--glow),inset -10px -12px 20px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-size:clamp(24px,3vw,36px);transition:transform .2s}
+.planet:hover .orb{transform:scale(1.08)}
+.planet .pname{font-size:clamp(12px,1.3vw,15px);font-weight:700;background:rgba(5,10,30,.7);padding:2px 8px;border-radius:99px;white-space:nowrap}
+.planet.locked{opacity:.35;cursor:default}
+.planet.next .orb{animation:pulse 1.4s infinite}
+@keyframes pulse{50%{box-shadow:0 0 40px var(--glow),0 0 0 8px rgba(255,255,255,.12),inset -10px -12px 20px rgba(0,0,0,.45)}}
+.done-tick{position:absolute;top:-4px;right:-4px;background:var(--green);color:#03210f;border-radius:50%;width:26px;height:26px;font-size:15px;display:flex;align-items:center;justify-content:center}
+#badges{display:flex;gap:6px;flex-wrap:wrap}
+.badge{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--panel2);border:1px solid var(--line);opacity:.3}
+.badge.got{opacity:1;border-color:var(--gold);box-shadow:0 0 12px rgba(255,207,74,.6)}
+/* play */
+#playgrid{display:grid;grid-template-columns:1.25fr 1fr;gap:14px;align-items:start}
+@media(max-width:860px){#playgrid{grid-template-columns:1fr}}
+.qhead{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.qtag{color:var(--gold);font-weight:800;letter-spacing:1px}
+.qtext{font-size:clamp(22px,2.6vw,32px);font-weight:700;line-height:1.3;margin:6px 0 14px}
+.big{font-size:clamp(34px,5vw,60px);font-weight:800;text-align:center;margin:6px 0 14px;font-family:Cambria,"Times New Roman",serif}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opts.three{grid-template-columns:repeat(3,1fr)}
+.opts.six{grid-template-columns:repeat(3,1fr)}
+@media(max-width:560px){.opts.three,.opts.six{grid-template-columns:1fr 1fr}}
+.opt{background:var(--panel2);border:2px solid var(--line);color:#fff;padding:14px 10px;font-size:clamp(20px,2.3vw,28px);border-radius:16px;min-height:66px;display:flex;align-items:center;justify-content:center;gap:10px;font-family:Cambria,"Times New Roman",serif;transition:transform .1s}
+.opt:hover{border-color:var(--cyan)}
+.opt.right{background:#0f7a52;border-color:var(--green)}
+.opt.wrong{background:#6d1d33;border-color:var(--red);animation:nope .35s}
+.opt:disabled{cursor:default}
+@keyframes nope{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.cmp{display:flex;align-items:center;justify-content:center;gap:clamp(10px,3vw,30px);margin:10px 0 18px}
+.cmp .side{font-size:clamp(36px,5vw,64px);font-weight:800;font-family:Cambria,"Times New Roman",serif;min-width:2.5em;text-align:center}
+.cmp .slot{width:clamp(64px,8vw,96px);height:clamp(64px,8vw,96px);border:3px dashed var(--gold);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--gold)}
+.slots{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px 0 14px}
+.slotb{min-width:clamp(62px,8vw,92px);height:70px;border:2px dashed var(--line);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:clamp(22px,2.6vw,30px);font-family:Cambria,"Times New Roman",serif;background:rgba(10,16,44,.6)}
+.slotb.fill{border-style:solid;border-color:var(--cyan)}
+.chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.chip{min-width:clamp(62px,8vw,92px);height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#9d8a7a,#4d3f36 70%);color:#fff;font-size:clamp(22px,2.6vw,30px);font-family:Cambria,"Times New Roman",serif;box-shadow:0 0 12px rgba(255,180,120,.3)}
+.chip.used{visibility:hidden}
+.actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+#feedback{margin-top:12px;display:none;border-radius:16px;padding:12px 16px;font-size:19px;line-height:1.45}
+#feedback.ok{display:block;background:rgba(15,122,82,.35);border:1px solid var(--green)}
+#feedback.no{display:block;background:rgba(109,29,51,.45);border:1px solid var(--red)}
+#feedback .m{font-family:Cambria,"Times New Roman",serif}
+.gridwrap{background:rgba(6,10,32,.75);border:1px solid var(--line);border-radius:16px;padding:6px}
+.gridwrap svg{width:100%;height:auto;max-height:58vh;display:block;margin:0 auto;touch-action:manipulation}
+#qcard .qtext{margin-bottom:8px}
+.gridwrap.tap svg{cursor:crosshair}
+.tapinfo{text-align:center;color:var(--grey);font-size:16px;padding:4px}
+/* fractions */
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.78em;line-height:1.05;margin:0 .1em}
+.fr>span:first-child{border-bottom:.08em solid currentColor;padding:0 .18em}
+.m{white-space:nowrap}
+/* escape */
+#locks{display:flex;gap:8px;flex-wrap:wrap}
+.lock{width:44px;height:44px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:22px}
+.lock.open{background:#0f7a52;border-color:var(--green)}
+.lock.cur{border-color:var(--gold);box-shadow:0 0 12px rgba(255,207,74,.6)}
+#clock{font-size:28px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--gold)}
+#clock.low{color:var(--red);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.4}}
+/* overlays */
+.modal{position:fixed;inset:0;z-index:20;background:rgba(2,4,16,.86);display:none;align-items:center;justify-content:center;padding:16px}
+.modal.on{display:flex}
+.modal .card{max-width:640px;width:100%;text-align:center}
+.badgebig{font-size:90px;animation:spin 1s ease-out}
+@keyframes spin{from{transform:scale(0) rotate(-180deg)}to{transform:none}}
+.cert{max-width:760px;margin:10px auto;text-align:center;border:3px solid var(--gold);border-radius:24px;padding:22px;background:linear-gradient(160deg,rgba(30,20,70,.92),rgba(8,14,44,.92));box-shadow:0 0 40px rgba(255,207,74,.35)}
+.cert h2{font-size:clamp(28px,4.6vw,50px);margin:6px 0;color:var(--gold)}
+.code{font-family:Consolas,monospace;font-size:24px;background:#0b1336;border:1px dashed var(--cyan);padding:8px 14px;border-radius:12px;display:inline-block;margin:8px 0;user-select:all}
+table{width:100%;border-collapse:collapse;font-size:15px}
+td,th{border-bottom:1px solid var(--line);padding:6px;text-align:left}
+.confetti{position:fixed;top:-20px;width:10px;height:14px;z-index:30;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.small{font-size:14px;color:var(--grey)}
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+
+<!-- ============ INTRO ============ -->
+<section class="screen on" id="s-intro">
+  <div class="top"><span class="brand">INSPIRE MATH · GRADE 6</span><span class="sp"></span><button class="iconbtn" id="mute1">🔊 Sound on</button><button class="iconbtn" id="teacherBtn">Teacher</button></div>
+  <div style="text-align:center;padding-top:4vh">
+    <div class="sub">QUIZ 2 PRACTICE · MODULE 4</div>
+    <h1 class="title">MISSION TO SPACE</h1>
+    <div class="sub" style="color:#fff">Beyond the Stars</div>
+  </div>
+  <div class="card" id="entry">
+    <div class="guide" style="margin-bottom:10px"><svg viewBox="0 0 100 115" class="astro"></svg><div class="bubble">Welcome, astronaut! Today you are not sitting in a classroom. You are going to fly through <b>8 space stations</b> and escape the final airlock. Are you ready?</div></div>
+    <label for="nm">Your name</label>
+    <input id="nm" maxlength="30" autocomplete="off" placeholder="Type your name">
+    <label for="cl">Your class</label>
+    <select id="cl"><option>6A</option><option>6B</option><option>6C</option></select>
+    <div style="text-align:center;margin-top:16px"><button class="btn gold" id="launchBtn">🚀 LAUNCH</button></div>
+    <div class="small" style="text-align:center;margin-top:8px">Your progress on this device is saved. Use the same name to continue.</div>
+  </div>
+</section>
+
+<!-- ============ MAP ============ -->
+<section class="screen" id="s-map">
+  <div class="top"><span class="brand">MISSION CONTROL</span><span class="pill" id="who"></span><span class="pill gold" id="pts1">0 points</span><span class="pill" id="stars1">⭐ 0</span><span class="sp"></span><button class="iconbtn" id="mute2">🔊</button></div>
+  <div id="prog"><div id="progfill"></div></div>
+  <div class="guide"><svg viewBox="0 0 100 115" class="astro"></svg><div class="bubble" id="mapsay"></div></div>
+  <div id="map"><svg id="mapsvg" preserveAspectRatio="none"></svg></div>
+  <div class="card" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><b>Mission badges</b><div id="badges"></div></div>
+</section>
+
+<!-- ============ PLAY ============ -->
+<section class="screen" id="s-play">
+  <div class="top"><button class="iconbtn" id="backMap">◀ Map</button><span class="brand" id="stName"></span><span class="pill" id="qcount"></span><span class="pill gold" id="pts2">0 points</span><span class="sp"></span>
+    <span id="escapeBar" style="display:none;align-items:center;gap:10px"><span id="clock">6:00</span></span><button class="iconbtn" id="mute3">🔊</button></div>
+  <div id="locksRow" style="display:none;margin-bottom:10px"><div id="locks"></div></div>
+  <div id="playgrid">
+    <div class="card" id="qcard"></div>
+    <div>
+      <div class="guide"><svg viewBox="0 0 100 115" class="astro" id="astroPlay"></svg><div class="bubble" id="say"></div></div>
+      <div class="actions"><button class="btn ghost" id="hintBtn">💡 Hint</button><button class="btn" id="nextBtn" style="display:none">NEXT ▶</button></div>
+      <div id="feedback"></div>
+      <div id="sidegrid" style="margin-top:12px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ END ============ -->
+<section class="screen" id="s-end">
+  <div class="cert">
+    <div class="sub">MISSION ACCOMPLISHED!</div>
+    <h2>You are officially a Universe Explorer!</h2>
+    <div style="font-size:26px;font-weight:800;margin:6px 0" id="certName"></div>
+    <div id="certStats" style="font-size:20px;color:var(--grey)"></div>
+    <div id="certBadges" style="font-size:34px;margin:10px 0;letter-spacing:6px"></div>
+    <div class="small">Your record code (show or send it to your teacher):</div>
+    <div class="code" id="certCode"></div>
+    <div class="actions" style="justify-content:center"><button class="btn" id="copyBtn">📋 Copy my report</button><button class="btn ghost" id="againBtn">Play again</button></div>
+    <div class="small" id="copied" style="margin-top:6px"></div>
+  </div>
+</section>
+
+<!-- modals -->
+<div class="modal" id="m-badge"><div class="card"><div class="badgebig" id="mbIcon"></div><h2 id="mbTitle" style="color:var(--gold);margin:6px 0"></h2><div id="mbText" style="font-size:19px;color:var(--grey)"></div><div style="margin-top:14px"><button class="btn gold" id="mbOk">Back to Mission Control</button></div></div></div>
+<div class="modal" id="m-teacher"><div class="card" style="text-align:left;max-width:860px;max-height:86vh;overflow:auto">
+  <h2 style="margin-top:0">Teacher logbook</h2>
+  <div id="tLock"><input id="pin" type="password" placeholder="PIN" style="font-size:20px;padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1336;color:#fff"> <button class="btn" id="pinOk">Open</button></div>
+  <div id="tBody" style="display:none">
+    <p class="small">Results saved on THIS device. Check a record code a student sends you:</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="vName" placeholder="Name" style="padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1336;color:#fff"><select id="vCls" style="padding:8px;border-radius:10px;background:#0b1336;color:#fff"><option>6A</option><option>6B</option><option>6C</option></select><input id="vCode" placeholder="MS-..." style="padding:8px;border-radius:10px;border:1px solid var(--line);background:#0b1336;color:#fff"><button class="btn ghost" id="vBtn">Verify</button><span id="vRes" style="align-self:center"></span></div>
+    <div style="margin:10px 0"><button class="btn ghost" id="csvBtn">Copy CSV</button> <button class="btn ghost" id="clrBtn">Clear logbook</button></div>
+    <table id="tTable"></table>
+  </div>
+  <div style="text-align:right;margin-top:10px"><button class="btn ghost" id="tClose">Close</button></div>
+</div></div>
+
+<div id="count"><div class="sub">LAUNCH SEQUENCE</div><div id="cnum">10</div></div>
+<svg id="rocket" viewBox="0 0 120 300"><defs><linearGradient id="rb" x1="0" x2="1"><stop offset="0" stop-color="#c9d4ff"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#8d9ad6"/></linearGradient><radialGradient id="fl" cx=".5" cy=".2"><stop offset="0" stop-color="#fff7c2"/><stop offset=".4" stop-color="#ffb02e"/><stop offset="1" stop-color="#ff3d00" stop-opacity="0"/></radialGradient></defs>
+<ellipse cx="60" cy="250" rx="26" ry="55" fill="url(#fl)"><animate attributeName="ry" values="45;60;48" dur=".2s" repeatCount="indefinite"/></ellipse>
+<path d="M60 10 C88 40 92 90 90 190 L30 190 C28 90 32 40 60 10Z" fill="url(#rb)"/><circle cx="60" cy="90" r="16" fill="#41e8ff" stroke="#24306b" stroke-width="5"/><path d="M30 150 L8 205 L30 195Z M90 150 L112 205 L90 195Z" fill="#ff4fd8"/><rect x="38" y="188" width="44" height="14" rx="4" fill="#24306b"/></svg>
+
+<script>
+"use strict";
+/* ---------- helpers ---------- */
+const $=id=>document.getElementById(id);
+const M="−";
+const F=(n,d)=>`<span class="fr"><span>${n}</span><span>${d}</span></span>`;
+const NF=(n,d)=>`${M}${F(n,d)}`;
+const P=(x,y)=>`(${fmt(x)}, ${fmt(y)})`;
+const fmt=v=>v<0?M+Math.abs(v):String(v);
+const AB=s=>`|${s}|`;
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const QUADS=["Quadrant I","Quadrant II","Quadrant III","Quadrant IV","x-axis","y-axis"];
+function whereIs(x,y){if(x===0&&y===0)return"origin";if(x===0)return"y-axis";if(y===0)return"x-axis";if(x>0&&y>0)return"Quadrant I";if(x<0&&y>0)return"Quadrant II";if(x<0&&y<0)return"Quadrant III";return"Quadrant IV";}
+
+/* ---------- questions (from the Quiz 2 practice worksheet) ---------- */
+// mcq: q, big, opts[], a (index), hint, ex | quad: x,y | cmp: l,r,lv,rv,ex | order: items[{h,v}], dir | refl: x,y,axis,name | dist: a,b,opts
+const STATIONS=[
+{id:"earth",name:"Earth Base",icon:"🌍",badge:"🌍",col:"radial-gradient(circle at 35% 30%,#7fd3ff,#1a6fd1 45%,#0b3b7a 70%)",glow:"#3da8ff",
+ hello:"Welcome to <b>Earth Base</b>! Here you turn real situations into integers. Words like <b>below</b>, <b>loses</b> and <b>spends</b> mean a negative number.",
+ qs:[
+ {t:"mcq",q:"Noura deposits 200 SAR in the bank.",big:"Which integer?",opts:["200",M+"200","0","2"],a:0,hint:"Depositing ADDS money to the bank. Is that positive or negative?",ex:"Depositing adds money, so the integer is positive: <b>200</b>."},
+ {t:"mcq",q:"A fish swims 15 m below sea level.",big:"Which integer?",opts:[M+"15","15","0",M+"1.5"],a:0,hint:"Sea level is 0. Below sea level is less than 0.",ex:"Below sea level is below 0, so the integer is <b>"+M+"15</b>."},
+ {t:"mcq",q:"A team loses 3 points.",big:"Which integer?",opts:["3",M+"3","0",M+"30"],a:1,hint:"Losing takes points away.",ex:"Losing takes points away, so the integer is <b>"+M+"3</b>."},
+ {t:"mcq",q:"An office is on the 8th floor above the ground.",big:"Which integer?",opts:[M+"8","8","0","80"],a:1,hint:"The ground is 0. Above the ground is greater than 0.",ex:"Above the ground is above 0, so the integer is <b>8</b>."},
+ {t:"mcq",q:"Reem spends 45 SAR on books.",big:"Which integer?",opts:["45",M+"45","0",M+"4.5"],a:1,hint:"Spending money means the money goes away.",ex:"Spending takes money away, so the integer is <b>"+M+"45</b>."}
+ ]},
+{id:"moon",name:"Moon Station",icon:"🌕",badge:"🌙",col:"radial-gradient(circle at 35% 30%,#f2f2f2,#a9a9b8 50%,#5d5d70 75%)",glow:"#d8d8ff",
+ hello:"This is <b>Moon Station</b>. The <b>opposite</b> is the same distance from 0 on the other side. The <b>absolute value</b> is the distance from 0, so it is never negative.",
+ qs:[
+ {t:"mcq",q:"What is the opposite of 12?",big:"12",opts:[M+"12","12","0",F(1,12)],a:0,hint:"Jump to the other side of 0, the same distance away.",ex:"12 is 12 units right of 0. Its opposite is 12 units left: <b>"+M+"12</b>."},
+ {t:"mcq",q:"What is the absolute value of "+M+"8?",big:AB(M+"8"),opts:[M+"8","8","0",M+"16"],a:1,hint:"How far is "+M+"8 from 0?",ex:M+"8 is 8 units from 0, so "+AB(M+"8")+" = <b>8</b>."},
+ {t:"mcq",q:"What is the opposite of 0?",big:"0",opts:["1",M+"1","0","No opposite"],a:2,hint:"0 is in the middle. How far is it from itself?",ex:"0 is neither positive nor negative. The opposite of 0 is <b>0</b>."},
+ {t:"mcq",q:"What is the opposite of "+M+"23?",big:M+"23",opts:[M+"23","23","0",M+"32"],a:1,hint:"The opposite of a negative number is ...",ex:"The opposite of "+M+"23 is <b>23</b>: same distance, other side of 0."},
+ {t:"mcq",q:"What is the absolute value of "+NF(2,3)+"?",big:AB(NF(2,3)),opts:[NF(2,3),F(2,3),F(3,2),"0"],a:1,hint:"Absolute value is a distance. Can a distance be negative?",ex:"The distance from 0 is "+F(2,3)+", so "+AB(NF(2,3))+" = <b>"+F(2,3)+"</b>."},
+ {t:"mcq",q:"What is the opposite of 4.5?",big:"4.5",opts:["4.5",M+"4.5","0",M+"5.4"],a:1,hint:"Same distance from 0, other side.",ex:"The opposite of 4.5 is <b>"+M+"4.5</b>."},
+ {t:"mcq",q:"The opposite of 13 is ...",big:"13",opts:[M+"13","13","0"],a:0,hint:"Other side of 0.",ex:"The opposite of 13 is <b>"+M+"13</b>."},
+ {t:"mcq",q:"True or false? The opposite of 0 is 0.",big:"",opts:["True","False"],a:0,hint:"Where is 0 on the number line?",ex:"<b>True.</b> 0 is its own opposite."}
+ ]},
+{id:"asteroid",name:"Asteroid Belt",icon:"☄️",badge:"☄️",col:"radial-gradient(circle at 35% 30%,#d9b28c,#8a5a3a 50%,#3f2618 75%)",glow:"#ffaf6e",
+ hello:"Asteroids ahead! Choose <b>&lt;</b>, <b>&gt;</b> or <b>=</b>. Remember: on the number line, the number further <b>right is greater</b>.",
+ qs:[
+ {t:"cmp",l:M+"5",r:M+"11",lv:-5,rv:-11,ex:M+"5 is to the right of "+M+"11 on the number line, so "+M+"5 &gt; "+M+"11."},
+ {t:"cmp",l:"0",r:M+"4",lv:0,rv:-4,ex:"0 is greater than every negative number, so 0 &gt; "+M+"4."},
+ {t:"cmp",l:AB(M+"9"),r:AB("9"),lv:9,rv:9,ex:AB(M+"9")+" = 9 and "+AB("9")+" = 9, so they are equal."},
+ {t:"cmp",l:M+"12",r:"3",lv:-12,rv:3,ex:"Every negative number is less than every positive number, so "+M+"12 &lt; 3."},
+ {t:"cmp",l:AB(M+"14"),r:"10",lv:14,rv:10,ex:AB(M+"14")+" = 14, and 14 &gt; 10."},
+ {t:"cmp",l:NF(1,2),r:M+"0.4",lv:-0.5,rv:-0.4,ex:NF(1,2)+" = "+M+"0.5. "+M+"0.5 is further left than "+M+"0.4, so "+NF(1,2)+" &lt; "+M+"0.4."},
+ {t:"cmp",l:M+"0.25",r:NF(1,4),lv:-0.25,rv:-0.25,ex:NF(1,4)+" = "+M+"0.25 (magic number 25: "+F(1,4)+" = "+F(25,100)+"), so they are equal."},
+ {t:"cmp",l:F(3,5),r:"0.7",lv:0.6,rv:0.7,ex:F(3,5)+" = "+F(6,10)+" = 0.6, and 0.6 &lt; 0.7."},
+ {t:"mcq",q:"True or false?",big:M+"10 &lt; "+M+"2",opts:["True","False"],a:0,hint:"Which one is further left on the number line?",ex:"<b>True.</b> "+M+"10 is further left than "+M+"2, so it is less."}
+ ]},
+{id:"lineup",name:"Planet Line-up",icon:"🪐",badge:"🪐",col:"radial-gradient(circle at 35% 30%,#ffe7a8,#e0a63d 50%,#8a5414 75%)",glow:"#ffcf4a",
+ hello:"Line the planets up! Tap the numbers <b>in order</b>. Change fractions to decimals first if it helps.",
+ qs:[
+ {t:"order",dir:"asc",items:[{h:"7",v:7},{h:M+"3",v:-3},{h:"0",v:0},{h:M+"9",v:-9},{h:"2",v:2}]},
+ {t:"order",dir:"asc",items:[{h:M+"1.5",v:-1.5},{h:F(3,4),v:.75},{h:M+"4",v:-4},{h:"1",v:1},{h:NF(1,4),v:-.25}]},
+ {t:"order",dir:"desc",items:[{h:M+"2",v:-2},{h:"5",v:5},{h:M+"7",v:-7},{h:"0.5",v:.5},{h:NF(1,2),v:-.5}]}
+ ]},
+{id:"fuel",name:"Fuel Lab",icon:"⛽",badge:"🧪",col:"radial-gradient(circle at 35% 30%,#b6ffde,#2fc58a 50%,#0b5e3e 75%)",glow:"#38e39b",
+ hello:"The rocket needs fuel! Change each fraction to a decimal. Use the <b>magic number</b>: make the bottom 10, 100 or 1000.",
+ qs:[
+ {t:"mcq",q:"Write as a decimal.",big:NF(1,4),opts:[M+"0.25",M+"0.4",M+"1.4","0.25"],a:0,hint:"4 &times; 25 = 100. Multiply top and bottom by 25.",ex:F(1,4)+" = "+F(25,100)+" = 0.25, so "+NF(1,4)+" = <b>"+M+"0.25</b>. Keep the negative sign!"},
+ {t:"mcq",q:"Write as a decimal.",big:F(2,5),opts:["0.25","0.4","2.5","0.04"],a:1,hint:"5 &times; 2 = 10. Multiply top and bottom by 2.",ex:F(2,5)+" = "+F(4,10)+" = <b>0.4</b>."},
+ {t:"mcq",q:"Write as a decimal.",big:NF(7,10),opts:[M+"0.07",M+"7.1",M+"0.7","0.7"],a:2,hint:"The bottom is already 10: 7 tenths.",ex:F(7,10)+" is 7 tenths = 0.7, so "+NF(7,10)+" = <b>"+M+"0.7</b>."},
+ {t:"mcq",q:"Write as a decimal.",big:F(3,8),opts:["0.38","0.375","3.8","0.83"],a:1,hint:"8 &times; 125 = 1000. Multiply top and bottom by 125.",ex:F(3,8)+" = "+F(375,1000)+" = <b>0.375</b>."}
+ ]},
+{id:"starmap",name:"Star Map",icon:"✨",badge:"🗺️",col:"radial-gradient(circle at 35% 30%,#c9b6ff,#6b45d6 50%,#2a1670 75%)",glow:"#a98bff",
+ hello:"Read the <b>Star Map</b>. Look at the signs: (+, +) is Quadrant I, ("+M+", +) is II, ("+M+", "+M+") is III, (+, "+M+") is IV. A 0 means the star sits on an <b>axis</b>.",
+ qs:[{t:"quad",x:3,y:-2},{t:"quad",x:-5,y:-6},{t:"quad",x:-1,y:4},{t:"quad",x:0,y:7},{t:"quad",x:-8,y:0},{t:"quad",x:2,y:9},{t:"quad",x:6,y:-2},{t:"quad",x:0,y:-5},
+ {t:"mcq",q:"True or false? The point "+P(-3,4)+" lies in Quadrant III.",big:"",opts:["True","False"],a:1,hint:"x is negative, y is positive. Which quadrant has ("+M+", +)?",ex:"<b>False.</b> ("+M+", +) is <b>Quadrant II</b>.",grid:[{x:-3,y:4}]}
+ ]},
+{id:"mirror",name:"Mirror Nebula",icon:"🌌",badge:"🪞",col:"radial-gradient(circle at 35% 30%,#ffc2f1,#d63ca8 50%,#5e0f4a 75%)",glow:"#ff4fd8",
+ hello:"In the <b>Mirror Nebula</b> every ship has a twin. Across the <b>x-axis</b>: change the sign of <b>y</b>. Across the <b>y-axis</b>: change the sign of <b>x</b>. Tap where the twin lands!",
+ qs:[{t:"refl",name:"P",x:4,y:-6,axis:"x"},{t:"refl",name:"P",x:4,y:-6,axis:"y"},{t:"refl",name:"Q",x:-2,y:-7,axis:"x"},{t:"refl",name:"Q",x:-2,y:-7,axis:"y"},
+ {t:"refl",name:"R",x:-3,y:8,axis:"x"},{t:"refl",name:"R",x:-3,y:8,axis:"y"},{t:"refl",name:"S",x:7,y:2,axis:"x"},{t:"refl",name:"S",x:7,y:2,axis:"y"}]},
+{id:"wormhole",name:"Wormhole",icon:"🌀",badge:"🌀",col:"radial-gradient(circle at 35% 30%,#a8f4ff,#1b8fb0 50%,#062f45 75%)",glow:"#41e8ff",
+ hello:"Jump through the <b>Wormhole</b>! Find the distance between two planets. If the points are on <b>opposite sides</b> of an axis, <b>add</b> the absolute values. Same side: <b>subtract</b>.",
+ qs:[{t:"dist",a:[-7,5],b:[3,5],opts:[10,4,-10,8]},{t:"dist",a:[4,-8],b:[4,1],opts:[7,9,-9,12]},{t:"dist",a:[-6,-2],b:[-1,-2],opts:[7,5,-5,6]},{t:"dist",a:[2,6],b:[2,-3],opts:[3,9,-9,8]}]},
+{id:"escape",name:"Final Airlock",icon:"🔐",badge:"🏆",col:"radial-gradient(circle at 35% 30%,#fff3c4,#ffb22e 45%,#b23a00 75%)",glow:"#ffb22e",
+ hello:"<b>FINAL AIRLOCK!</b> Open 8 locks before the clock reaches 0. A wrong answer costs 20 seconds, so think first!",
+ qs:[
+ {t:"mcq",q:"A gain of 7 kg is written as",big:"",opts:["7",M+"7","0.7"],a:0,hint:"A gain adds.",ex:"A gain is positive: <b>7</b>."},
+ {t:"mcq",q:"",big:AB(M+"21")+" =",opts:[M+"21","0","21"],a:2,hint:"Distance from 0.",ex:M+"21 is 21 units from 0, so the answer is <b>21</b>."},
+ {t:"mcq",q:"Which statement is true?",big:"",opts:[M+"3 &gt; "+M+"8",M+"3 &lt; "+M+"8",M+"3 = "+M+"8"],a:0,hint:"Which is further right: "+M+"3 or "+M+"8?",ex:M+"3 is to the right of "+M+"8, so <b>"+M+"3 &gt; "+M+"8</b>."},
+ {t:"mcq",q:"The point "+P(6,-2)+" lies in",big:"",opts:["Quadrant I","Quadrant IV","Quadrant III"],a:1,hint:"x positive, y negative.",ex:"(+, "+M+") is <b>Quadrant IV</b>.",grid:[{x:6,y:-2}]},
+ {t:"mcq",q:"Reflecting "+P(2,-9)+" across the y-axis gives",big:"",opts:[P(-2,-9),P(2,9),P(-2,9)],a:0,hint:"Across the y-axis: change the sign of x only.",ex:"Change the sign of x: <b>"+P(-2,-9)+"</b>.",grid:[{x:2,y:-9},{x:-2,y:-9,c:"#ff4fd8"}]},
+ {t:"mcq",q:"The distance between "+P(-5,1)+" and "+P(4,1)+" is",big:"",opts:["1 unit","9 units",M+"9 units"],a:1,hint:"Opposite sides of the y-axis: add 5 + 4. A distance is never negative.",ex:"5 + 4 = <b>9 units</b>. A distance is never negative.",grid:[{x:-5,y:1},{x:4,y:1}]},
+ {t:"mcq",q:"True or false?",big:AB(M+"6")+" = "+M+"6",opts:["True","False"],a:1,hint:"Can an absolute value be negative?",ex:"<b>False.</b> "+AB(M+"6")+" = 6. An absolute value is never negative."},
+ {t:"mcq",q:"True or false? Reflecting "+P(5,-1)+" across the x-axis gives "+P(5,1)+".",big:"",opts:["True","False"],a:0,hint:"Across the x-axis: change the sign of y.",ex:"<b>True.</b> Change the sign of y: "+M+"1 becomes 1.",grid:[{x:5,y:-1},{x:5,y:1,c:"#ff4fd8"}]}
+ ]}
+];
+/* expand computed question types into answers + explanations */
+STATIONS.forEach(st=>st.qs.forEach(q=>{
+ if(st.id==="escape"&&q.grid)q.showGridAfter=true;
+ if(q.t==="quad"){const w=whereIs(q.x,q.y);q.q="Where is the star "+P(q.x,q.y)+"?";q.big="";q.opts=QUADS.slice();q.a=QUADS.indexOf(w);q.fixed=true;q.grid=[{x:q.x,y:q.y}];q.showGridAfter=true;
+  q.hint="x is "+(q.x>0?"positive":q.x<0?"negative":"0")+" and y is "+(q.y>0?"positive":q.y<0?"negative":"0")+".";
+  q.ex=(q.x===0?"x is 0, so the star is on the <b>y-axis</b>.":q.y===0?"y is 0, so the star is on the <b>x-axis</b>.":"The signs are ("+(q.x>0?"+":M)+", "+(q.y>0?"+":M)+"), so it is in <b>"+w+"</b>.");}
+ if(q.t==="cmp"){q.ans=q.lv>q.rv?">":q.lv<q.rv?"<":"=";q.hint="Change both sides to plain numbers, then picture the number line.";}
+ if(q.t==="order"){q.ans=q.items.slice().sort((a,b)=>q.dir==="asc"?a.v-b.v:b.v-a.v);q.hint=q.dir==="asc"?"Start with the number furthest LEFT on the number line (the most negative).":"Start with the number furthest RIGHT on the number line (the biggest).";
+  q.ex=(q.dir==="asc"?"Least to greatest: ":"Greatest to least: ")+q.ans.map(i=>i.h).join(", &nbsp;");}
+ if(q.t==="refl"){q.ans=q.axis==="x"?[q.x,-q.y]:[-q.x,q.y];q.hint=q.axis==="x"?"Across the x-axis, x stays the same. Change the sign of y.":"Across the y-axis, y stays the same. Change the sign of x.";
+  q.ex=q.name+P(q.x,q.y)+" across the "+q.axis+"-axis &rarr; <b>"+P(q.ans[0],q.ans[1])+"</b>. "+(q.axis==="x"?"Only y changes sign.":"Only x changes sign.");}
+ if(q.t==="dist"){const[ax,ay]=q.a,[bx,by]=q.b;const same=ax===bx?"x":"y";const c1=same==="x"?ay:ax,c2=same==="x"?by:bx;q.ans=Math.abs(c1-c2);
+  const opp=(c1<0)!==(c2<0)&&c1!==0&&c2!==0;
+  q.q="Distance between "+P(ax,ay)+" and "+P(bx,by)+"?";q.big="";q.optsH=q.opts.map(v=>fmt(v)+" units");q.a=q.opts.indexOf(q.ans);q.grid=[{x:ax,y:ay},{x:bx,y:by}];
+  q.hint="The "+(same==="x"?"x":"y")+"-coordinates are the same. Look at the other coordinates: "+fmt(c1)+" and "+fmt(c2)+". "+(opp?"Opposite signs: add.":"Same sign: subtract.");
+  q.ex=(opp?"|"+fmt(c1)+"| + |"+fmt(c2)+"| = "+Math.abs(c1)+" + "+Math.abs(c2):"|"+fmt(c1)+"| "+M+" |"+fmt(c2)+"| = "+Math.max(Math.abs(c1),Math.abs(c2))+" "+M+" "+Math.min(Math.abs(c1),Math.abs(c2)))+" = <b>"+q.ans+" units</b>. A distance is never negative.";
+  q.opts=q.optsH;}
+}));
+const ALLQ=STATIONS.reduce((s,st)=>s+st.qs.length,0);
+
+/* ---------- state ---------- */
+const KEY="g6-space-quiz2", LOG="g6-space-quiz2-log", PIN="2468";
+let S=null; // {name,cls,pts,first,done:{stationId:true},answered:{},escapeLeft}
+let cur={st:0,qi:0,tries:0,solved:false};
+let muted=false;
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(e){return{};}};
+const store=all=>{try{localStorage.setItem(KEY,JSON.stringify(all));}catch(e){}};
+const pkey=()=>S.cls+"|"+S.name.toLowerCase();
+function save(){const all=load();all[pkey()]=S;store(all);}
+function hash(s){let h=5381;for(const c of s)h=((h*33)^c.charCodeAt(0))>>>0;return h.toString(36).toUpperCase().slice(-4);}
+const makeCode=(name,cls,first,pts)=>`MS-${first}-${pts}-${hash(name.toLowerCase().trim()+"|"+cls+"|"+first+"|"+pts+"|space")}`;
+
+/* ---------- sound ---------- */
+let ac=null;
+function tone(f,d,type="sine",g=.12,w=0){if(muted)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),v=ac.createGain(),t=ac.currentTime+w;o.type=type;o.frequency.setValueAtTime(f,t);v.gain.setValueAtTime(g,t);v.gain.exponentialRampToValueAtTime(.0008,t+d);o.connect(v).connect(ac.destination);o.start(t);o.stop(t+d+.02);}catch(e){}}
+function rumble(sec){if(muted)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const n=ac.sampleRate*sec,b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.min(1,i/(ac.sampleRate*.4))*(1-i/n);const s=ac.createBufferSource();s.buffer=b;const f=ac.createBiquadFilter();f.type="lowpass";f.frequency.value=380;const g=ac.createGain();g.gain.value=.5;s.connect(f).connect(g).connect(ac.destination);s.start();}catch(e){}}
+const sRight=()=>{tone(660,.15,"triangle");tone(990,.3,"triangle",.12,.12);};
+const sWrong=()=>{tone(220,.18,"square",.06);tone(170,.3,"square",.06,.15);};
+const sTick=()=>tone(1200,.05,"square",.04);
+const sBeep=()=>tone(880,.12,"sine",.1);
+const sBadge=()=>[523,659,784,1047,1319].forEach((f,i)=>tone(f,.4,"triangle",.12,i*.11));
+function setMute(m){muted=m;["mute1","mute2","mute3"].forEach(id=>$(id).textContent=m?"🔇"+(id==="mute1"?" Sound off":""):"🔊"+(id==="mute1"?" Sound on":""));}
+["mute1","mute2","mute3"].forEach(id=>$(id).onclick=()=>setMute(!muted));
+
+/* ---------- starfield ---------- */
+const sky=$("sky"),cx=sky.getContext("2d");let stars=[],shoot=null,speed=.15;
+function resize(){sky.width=innerWidth*devicePixelRatio;sky.height=innerHeight*devicePixelRatio;stars=Array.from({length:240},()=>({x:Math.random(),y:Math.random(),z:Math.random()*.9+.1,t:Math.random()*6}));}
+addEventListener("resize",resize);resize();
+(function frame(){const w=sky.width,h=sky.height;const g=cx.createRadialGradient(w*.75,h*.2,0,w*.75,h*.2,w*.8);g.addColorStop(0,"#1a1050");g.addColorStop(.5,"#070a2a");g.addColorStop(1,"#02040f");cx.fillStyle=g;cx.fillRect(0,0,w,h);
+ const n=cx.createRadialGradient(w*.15,h*.85,0,w*.15,h*.85,w*.45);n.addColorStop(0,"rgba(255,79,216,.16)");n.addColorStop(1,"rgba(255,79,216,0)");cx.fillStyle=n;cx.fillRect(0,0,w,h);
+ for(const s of stars){s.y+=speed*s.z*.0012;if(s.y>1)s.y=0;s.t+=.04;const a=.45+.55*Math.abs(Math.sin(s.t));cx.fillStyle=`rgba(255,255,255,${a*s.z})`;const r=s.z*1.6*devicePixelRatio;cx.fillRect(s.x*w,s.y*h,r,r);}
+ if(!shoot&&Math.random()<.004)shoot={x:Math.random()*w*.7,y:Math.random()*h*.4,l:0};
+ if(shoot){shoot.l+=18*devicePixelRatio;cx.strokeStyle="rgba(255,255,255,.8)";cx.lineWidth=2*devicePixelRatio;cx.beginPath();cx.moveTo(shoot.x+shoot.l,shoot.y+shoot.l*.45);cx.lineTo(shoot.x+shoot.l-90,shoot.y+(shoot.l-90)*.45);cx.stroke();if(shoot.l>w*.5)shoot=null;}
+ requestAnimationFrame(frame);})();
+
+/* ---------- astronaut guide ---------- */
+function astro(mood){const eyes=mood==="happy"?'<path d="M40 52 q4 -5 8 0 M54 52 q4 -5 8 0" stroke="#1b2550" stroke-width="3" fill="none" stroke-linecap="round"/>':mood==="think"?'<circle cx="44" cy="52" r="3.2" fill="#1b2550"/><circle cx="58" cy="50" r="3.2" fill="#1b2550"/>':'<circle cx="44" cy="51" r="3.4" fill="#1b2550"/><circle cx="58" cy="51" r="3.4" fill="#1b2550"/>';
+ const mouth=mood==="happy"?'<path d="M44 61 q7 8 14 0" stroke="#1b2550" stroke-width="3" fill="#ff8fb0" stroke-linecap="round"/>':mood==="think"?'<path d="M45 63 h11" stroke="#1b2550" stroke-width="3" stroke-linecap="round"/>':'<path d="M45 61 q6 4 12 0" stroke="#1b2550" stroke-width="3" fill="none" stroke-linecap="round"/>';
+ return `<ellipse cx="51" cy="104" rx="30" ry="9" fill="rgba(65,232,255,.18)"/><rect x="24" y="72" width="54" height="34" rx="16" fill="#eef2ff"/><rect x="41" y="80" width="20" height="12" rx="3" fill="#41e8ff"/><circle cx="46" cy="86" r="2" fill="#ff4fd8"/><circle cx="56" cy="86" r="2" fill="#ffcf4a"/>
+ <circle cx="51" cy="52" r="33" fill="#eef2ff"/><circle cx="51" cy="54" r="25" fill="#3a2a5e"/><path d="M30 58 q0 -24 21 -26 q21 2 21 26 q-3 -14 -21 -14 q-18 0 -21 14z" fill="#5b3b8c"/><ellipse cx="51" cy="57" rx="19" ry="17" fill="#f6c9a8"/>${eyes}${mouth}
+ <circle cx="51" cy="52" r="33" fill="none" stroke="#c7d2ff" stroke-width="4"/><path d="M28 36 q10 -14 26 -15" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" opacity=".8"/><circle cx="51" cy="18" r="4" fill="#ff4fd8"/>`;}
+function setAstro(m){document.querySelectorAll(".astro").forEach(s=>s.innerHTML=astro(m));}
+setAstro("happy");
+function say(html,mood){$("say").innerHTML=html;$("astroPlay").innerHTML=astro(mood||"plain");}
+
+/* ---------- coordinate grid ---------- */
+const R=10;
+function gridSVG(pts,opts={}){const r=opts.r||R,u=1;let s=`<svg viewBox="${-r-.8} ${-r-.8} ${2*r+1.6} ${2*r+1.6}">`;
+ for(let i=-r;i<=r;i++){s+=`<line x1="${i}" y1="${-r}" x2="${i}" y2="${r}" stroke="#2a3a7a" stroke-width=".04"/><line x1="${-r}" y1="${i}" x2="${r}" y2="${i}" stroke="#2a3a7a" stroke-width=".04"/>`;}
+ s+=`<line x1="${-r}" y1="0" x2="${r}" y2="0" stroke="#cfd8ff" stroke-width=".1"/><line x1="0" y1="${-r}" x2="0" y2="${r}" stroke="#cfd8ff" stroke-width=".1"/>`;
+ for(let i=-r;i<=r;i++){if(i===0)continue;s+=`<text x="${i}" y=".75" font-size=".52" fill="#a9b6e0" text-anchor="middle">${i<0?M+(-i):i}</text><text x="-.3" y="${-i+.18}" font-size=".52" fill="#a9b6e0" text-anchor="end">${i<0?M+(-i):i}</text>`;}
+ s+=`<text x="${r+.2}" y="-.3" font-size=".7" fill="#fff" font-style="italic">x</text><text x=".3" y="${-r+.1}" font-size=".7" fill="#fff" font-style="italic">y</text>`;
+ if(opts.quads)[["I",r/2,-r/2],["II",-r/2,-r/2],["III",-r/2,r/2],["IV",r/2,r/2]].forEach(([t,x,y])=>s+=`<text x="${x}" y="${y}" font-size="1.4" fill="rgba(169,182,224,.18)" text-anchor="middle" font-weight="700">${t}</text>`);
+ (pts||[]).forEach(p=>{const c=p.c||"#ffcf4a";s+=`<circle cx="${p.x}" cy="${-p.y}" r=".5" fill="${c}" opacity=".25"/><circle cx="${p.x}" cy="${-p.y}" r=".28" fill="${c}"/>`;if(p.label)s+=`<text x="${p.x+.4}" y="${-p.y-.4}" font-size=".65" fill="${c}" font-weight="700">${p.label}</text>`;});
+ if(opts.line&&pts.length===2)s+=`<line x1="${pts[0].x}" y1="${-pts[0].y}" x2="${pts[1].x}" y2="${-pts[1].y}" stroke="#41e8ff" stroke-width=".12" stroke-dasharray=".3 .2"/>`;
+ return s+"</svg>";}
+
+/* ---------- screens ---------- */
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id===id));window.scrollTo(0,0);}
+$("launchBtn").onclick=()=>{const name=$("nm").value.trim();if(!name){$("nm").focus();$("nm").placeholder="Please type your name first";return;}
+ const cls=$("cl").value;const all=load();S=all[cls+"|"+name.toLowerCase()]||{name,cls,pts:0,first:0,done:{},answered:{}};S.name=name;save();
+ if(Object.keys(S.done).length)return openMap();launchSeq();};
+function launchSeq(){const c=$("count");c.classList.add("on");let n=10;$("cnum").textContent=n;sBeep();
+ const iv=setInterval(()=>{n--;if(n>0){$("cnum").textContent=n;sBeep();}else{clearInterval(iv);$("cnum").textContent="LIFTOFF!";$("cnum").style.fontSize="min(16vw,140px)";rumble(3);document.body.classList.add("shake");$("rocket").classList.add("go");speed=6;
+  setTimeout(()=>{document.body.classList.remove("shake");c.classList.remove("on");$("rocket").classList.remove("go");$("cnum").style.fontSize="";speed=.15;openMap(true);},2700);}},600);}
+function nextIndex(){return STATIONS.findIndex(st=>!S.done[st.id]);}
+function openMap(first){show("s-map");setAstro("happy");
+ $("who").textContent=S.name+" · "+S.cls;$("pts1").textContent=S.pts+" points";$("stars1").textContent="⭐ "+S.first;
+ const answered=Object.keys(S.answered).length;$("progfill").style.width=(100*answered/ALLQ)+"%";
+ const ni=nextIndex();
+ $("mapsay").innerHTML=ni<0?"All stations complete! You are a <b>Universe Explorer</b>. Tap any station to practise again.":first?`Liftoff complete, <b>${S.name}</b>! Your first stop is <b>${STATIONS[0].name}</b>. Tap the glowing planet.`:`Next stop: <b>${STATIONS[ni].name}</b>. Tap the glowing planet.`;
+ const map=$("map");map.querySelectorAll(".planet").forEach(p=>p.remove());
+ const pos=[[8,78],[20,42],[33,74],[45,32],[56,70],[67,30],[77,68],[88,38],[93,82]];
+ let path="";pos.forEach(([x,y],i)=>path+=(i?" L":"M")+x+" "+y);$("mapsvg").setAttribute("viewBox","0 0 100 100");$("mapsvg").innerHTML=`<path d="${path}" fill="none" stroke="rgba(65,232,255,.35)" stroke-width=".5" stroke-dasharray="1.4 1.2" vector-effect="non-scaling-stroke"/>`;
+ STATIONS.forEach((st,i)=>{const b=document.createElement("button");b.className="planet";b.style.left=pos[i][0]+"%";b.style.top=pos[i][1]+"%";
+  const unlocked=i<=ni||ni<0||S.done[st.id];if(!unlocked)b.classList.add("locked");if(i===ni)b.classList.add("next");
+  b.innerHTML=`<div class="orb" style="background:${st.col};--glow:${st.glow};position:relative">${unlocked?st.icon:"🔒"}${S.done[st.id]?'<span class="done-tick">✓</span>':""}</div><span class="pname">${i+1}. ${st.name}</span>`;
+  b.onclick=()=>{if(unlocked)startStation(i);};map.appendChild(b);});
+ $("badges").innerHTML=STATIONS.map(st=>`<span class="badge ${S.done[st.id]?"got":""}" title="${st.name}">${st.badge}</span>`).join("");}
+
+/* ---------- play ---------- */
+let escTimer=null,escLeft=360;
+function startStation(i){cur={st:i,qi:0,tries:0,solved:false};const st=STATIONS[i];show("s-play");$("stName").textContent=st.icon+" "+st.name.toUpperCase();
+ const isEsc=st.id==="escape";$("escapeBar").style.display=isEsc?"flex":"none";$("locksRow").style.display=isEsc?"block":"none";
+ if(isEsc){escLeft=360;clearInterval(escTimer);escTimer=setInterval(escTick,1000);paintClock();}
+ renderQ(true);}
+function escTick(){if(escLeft<=0)return;escLeft--;paintClock();if(escLeft<=10&&escLeft>0)sTick();if(escLeft===0){say("The airlock timer reached 0, but don't worry: keep opening the locks. You just lose the time bonus.","think");sWrong();}}
+function paintClock(){const m=Math.floor(escLeft/60),s=escLeft%60;$("clock").textContent=m+":"+String(s).padStart(2,"0");$("clock").classList.toggle("low",escLeft<=30);}
+function renderQ(intro){const st=STATIONS[cur.st],q=st.qs[cur.qi];cur.tries=0;cur.solved=false;cur.pick=[];
+ $("qcount").textContent=`Question ${cur.qi+1} of ${st.qs.length}`;$("pts2").textContent=S.pts+" points";
+ $("feedback").className="";$("feedback").innerHTML="";$("nextBtn").style.display="none";$("hintBtn").style.display="";$("sidegrid").innerHTML="";
+ if(st.id==="escape")$("locks").innerHTML=st.qs.map((_,k)=>`<span class="lock ${k<cur.qi?"open":k===cur.qi?"cur":""}">${k<cur.qi?"🔓":"🔒"}</span>`).join("");
+ say(intro?st.hello:pickLine(st.id),"plain");
+ const box=$("qcard");let h="";
+ if(q.t==="mcq"||q.t==="quad"||q.t==="dist"){
+  h+=`<div class="qhead"><span class="qtag">${st.icon} ${st.name}</span></div>`;
+  if(q.q)h+=`<div class="qtext">${q.q}</div>`;if(q.big)h+=`<div class="big">${q.big}</div>`;
+  const order=q.fixed?q.opts.map((_,k)=>k):shuffle(q.opts.map((_,k)=>k));const n=q.opts.length;
+  h+=`<div class="opts ${n===6?"six":n===3?"three":""}">`+order.map(k=>`<button class="opt" data-k="${k}"><span class="m">${q.opts[k]}</span></button>`).join("")+"</div>";
+  box.innerHTML=h;box.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answerMCQ(b,+b.dataset.k));
+  if((q.t==="dist")||(q.grid&&!q.showGridAfter))$("sidegrid").innerHTML=`<div class="gridwrap">${gridSVG(q.grid.map(p=>({...p,label:P(p.x,p.y)})),{line:q.t==="dist"})}</div>`;
+ }else if(q.t==="cmp"){
+  h+=`<div class="qhead"><span class="qtag">${st.icon} Compare</span></div><div class="qtext">Choose &lt;, &gt; or =</div><div class="cmp"><span class="side">${q.l}</span><span class="slot" id="cslot">?</span><span class="side">${q.r}</span></div>`;
+  h+=`<div class="opts three">`+["<",">","="].map(s=>`<button class="opt" data-s="${s}" style="font-size:44px">${s==="<"?"&lt;":s===">"?"&gt;":"="}</button>`).join("")+"</div>";
+  box.innerHTML=h;box.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answerCmp(b,b.dataset.s));
+ }else if(q.t==="order"){
+  h+=`<div class="qhead"><span class="qtag">${st.icon} Line-up</span></div><div class="qtext">Order from <b style="color:var(--gold)">${q.dir==="asc"?"LEAST to GREATEST":"GREATEST to LEAST"}</b></div>`;
+  h+=`<div class="slots" id="oslots">${q.items.map(()=>`<div class="slotb"></div>`).join("")}</div><div class="chips" id="ochips">`+shuffle(q.items.map((_,k)=>k)).map(k=>`<button class="chip" data-k="${k}">${q.items[k].h}</button>`).join("")+`</div>`;
+  h+=`<div class="actions"><button class="btn ghost" id="oUndo">↶ Undo</button><button class="btn gold" id="oCheck" disabled>CHECK</button></div>`;
+  box.innerHTML=h;box.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{if(cur.solved)return;cur.pick.push(+b.dataset.k);b.classList.add("used");paintSlots(q);});
+  $("oUndo").onclick=()=>{if(cur.solved||!cur.pick.length)return;const k=cur.pick.pop();box.querySelector(`.chip[data-k="${k}"]`).classList.remove("used");paintSlots(q);};
+  $("oCheck").onclick=()=>answerOrder(q);
+ }else if(q.t==="refl"){
+  h+=`<div class="qhead"><span class="qtag">${st.icon} Mirror</span></div><div class="qtext">Reflect ship <b style="color:var(--gold)">${q.name}${P(q.x,q.y)}</b> across the <b style="color:var(--pink)">${q.axis}-axis</b>. Tap where its twin lands.</div>`;
+  h+=`<div class="gridwrap tap" id="tapgrid">${gridSVG([{x:q.x,y:q.y,label:q.name}],{quads:true})}</div><div class="tapinfo" id="tapinfo">Tap a point on the grid</div>`;
+  box.innerHTML=h;const svg=$("tapgrid").querySelector("svg");
+  svg.addEventListener("pointermove",e=>{if(cur.solved)return;const p=svgPt(svg,e);if(p)$("tapinfo").textContent="Tap here: "+P(p[0],p[1]).replace(/−/g,"−");});
+  svg.addEventListener("click",e=>{const p=svgPt(svg,e);if(p)answerRefl(svg,p);});
+ }}
+function svgPt(svg,e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const p=pt.matrixTransform(svg.getScreenCTM().inverse());const x=Math.round(p.x),y=-Math.round(p.y);if(Math.abs(x)>R||Math.abs(y)>R)return null;return[x,y];}
+function paintSlots(q){const sl=$("oslots").children;for(let i=0;i<sl.length;i++){const k=cur.pick[i];sl[i].innerHTML=k===undefined?"":q.items[k].h;sl[i].classList.toggle("fill",k!==undefined);}$("oCheck").disabled=cur.pick.length!==q.items.length;}
+const LINES={earth:["Keep going, astronaut!","Read the words carefully: positive or negative?"],moon:["Think about the number line.","Opposite: other side. Absolute value: distance."],asteroid:["Picture the number line!","Further right means greater."],lineup:["Which planet comes first?"],fuel:["Find the magic number first."],starmap:["Check the signs of x and y."],mirror:["Which coordinate changes sign?"],wormhole:["Count the jump carefully."],escape:["Lock by lock. Stay calm!","The clock is ticking. Think first!"]};
+const pickLine=id=>{const l=LINES[id];return l[Math.floor(Math.random()*l.length)];};
+const PRAISE=["Brilliant!","Stellar work!","Out of this world!","Perfect landing!","Superb, astronaut!","You're a star!"];
+
+function scoreRight(){const first=cur.tries===0;const st=STATIONS[cur.st],q=st.qs[cur.qi];const key=st.id+cur.qi;
+ if(!S.answered[key]){S.answered[key]=first?2:1;S.pts+=first?10:5;if(first)S.first++;}
+ cur.solved=true;sRight();save();$("pts2").textContent=S.pts+" points";
+ const p=PRAISE[Math.floor(Math.random()*PRAISE.length)];
+ say(`<b>${p}</b> ${first?"+10 points and a star ⭐":"+5 points. You got it on a second try."}`,"happy");
+ fb(true,q.ex);$("hintBtn").style.display="none";$("nextBtn").style.display="";$("nextBtn").textContent=cur.qi===st.qs.length-1?"FINISH STATION ▶":"NEXT ▶";
+ if(q.showGridAfter)$("sidegrid").innerHTML=`<div class="gridwrap">${gridSVG(q.grid.map(p=>({...p,label:P(p.x,p.y)})),{quads:true})}</div>`;
+ if(st.id==="escape"){const l=$("locks").children[cur.qi];l.className="lock open";l.textContent="🔓";}}
+function scoreWrong(extra){cur.tries++;sWrong();const st=STATIONS[cur.st],q=st.qs[cur.qi];
+ if(st.id==="escape"&&escLeft>0){escLeft=Math.max(0,escLeft-20);paintClock();}
+ say(`Not quite. Good try! <b>Hint:</b> ${q.hint}`,"think");fb(false,(extra?extra+" ":"")+"Try again!");}
+function fb(ok,html){const f=$("feedback");f.className=ok?"ok":"no";f.innerHTML=(ok?"✅ ":"❌ ")+html;}
+function answerMCQ(b,k){if(cur.solved)return;const q=STATIONS[cur.st].qs[cur.qi];if(k===q.a){b.classList.add("right");$("qcard").querySelectorAll(".opt").forEach(o=>o.disabled=true);scoreRight();}else{b.classList.add("wrong");b.disabled=true;scoreWrong();}}
+function answerCmp(b,s){if(cur.solved)return;const q=STATIONS[cur.st].qs[cur.qi];$("cslot").innerHTML=s==="<"?"&lt;":s===">"?"&gt;":"=";if(s===q.ans){b.classList.add("right");$("qcard").querySelectorAll(".opt").forEach(o=>o.disabled=true);scoreRight();}else{b.classList.add("wrong");b.disabled=true;scoreWrong();}}
+function answerOrder(q){if(cur.solved)return;const ok=cur.pick.every((k,i)=>q.items[k].v===q.ans[i].v);
+ if(ok){$("oslots").querySelectorAll(".slotb").forEach(s=>s.style.borderColor="var(--green)");scoreRight();}
+ else{scoreWrong();const sl=$("oslots").children;cur.pick.forEach((k,i)=>{sl[i].style.borderColor=q.items[k].v===q.ans[i].v?"var(--green)":"var(--red)";});
+  setTimeout(()=>{cur.pick=[];$("qcard").querySelectorAll(".chip").forEach(c=>c.classList.remove("used"));[...sl].forEach(s=>s.style.borderColor="");paintSlots(q);},1600);}}
+function answerRefl(svg,p){if(cur.solved)return;const q=STATIONS[cur.st].qs[cur.qi];const ok=p[0]===q.ans[0]&&p[1]===q.ans[1];
+ const g=document.createElementNS("http://www.w3.org/2000/svg","g");g.innerHTML=`<circle cx="${p[0]}" cy="${-p[1]}" r=".32" fill="${ok?"#38e39b":"#ff5d73"}"/><text x="${p[0]+.4}" y="${-p[1]+1}" font-size=".6" fill="${ok?"#38e39b":"#ff5d73"}" font-weight="700">${P(p[0],p[1])}</text>`;svg.appendChild(g);
+ if(ok){g.innerHTML+=`<line x1="${q.x}" y1="${-q.y}" x2="${p[0]}" y2="${-p[1]}" stroke="#ff4fd8" stroke-width=".1" stroke-dasharray=".3 .2"/>`;$("tapinfo").textContent="Twin found at "+P(p[0],p[1]);scoreRight();}
+ else{scoreWrong("You tapped "+P(p[0],p[1])+".");setTimeout(()=>g.remove(),1500);}}
+$("hintBtn").onclick=()=>{const q=STATIONS[cur.st].qs[cur.qi];say("<b>Hint:</b> "+q.hint,"think");};
+$("nextBtn").onclick=()=>{const st=STATIONS[cur.st];if(cur.qi<st.qs.length-1){cur.qi++;renderQ(false);}else finishStation();};
+$("backMap").onclick=()=>{clearInterval(escTimer);openMap();};
+function finishStation(){const st=STATIONS[cur.st];const was=S.done[st.id];S.done[st.id]=true;
+ if(st.id==="escape"){clearInterval(escTimer);const bonus=Math.round(escLeft/10);if(!S.escBonus){S.escBonus=bonus;S.pts+=bonus;}save();return endGame(bonus);}
+ save();sBadge();confetti();
+ $("mbIcon").textContent=st.badge;$("mbTitle").textContent=was?st.name+" complete again!":st.name+" badge earned!";
+ const ni=nextIndex();$("mbText").innerHTML=ni>=0?`Next stop: <b>${STATIONS[ni].name}</b>.`:"All stations complete!";$("m-badge").classList.add("on");}
+$("mbOk").onclick=()=>{$("m-badge").classList.remove("on");openMap();};
+function endGame(bonus){show("s-end");sBadge();confetti();setTimeout(confetti,700);
+ const code=makeCode(S.name,S.cls,S.first,S.pts);S.code=code;save();
+ $("certName").textContent=S.name+" · "+S.cls;
+ $("certStats").innerHTML=`⭐ ${S.first} of ${ALLQ} first-try stars &nbsp;·&nbsp; ${S.pts} points${bonus?` &nbsp;·&nbsp; airlock time bonus +${bonus}`:""}`;
+ $("certBadges").textContent=STATIONS.filter(s=>S.done[s.id]).map(s=>s.badge).join(" ");$("certCode").textContent=code;
+ const log=getLog();log.push({name:S.name,cls:S.cls,first:S.first,total:ALLQ,pts:S.pts,code,date:new Date().toLocaleString()});try{localStorage.setItem(LOG,JSON.stringify(log));}catch(e){}}
+$("copyBtn").onclick=()=>{const t=`Mission to Space (G6 Quiz 2) - ${S.name} ${S.cls}: ${S.first}/${ALLQ} first-try stars, ${S.pts} points, code ${S.code}`;
+ (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>$("copied").textContent="Copied! Paste it in a message to your teacher.").catch(()=>{$("copied").textContent=t;});};
+$("againBtn").onclick=()=>{if(!confirm("Start the mission again from Earth Base? Your score starts again from 0."))return;const all=load();delete all[pkey()];store(all);S={name:S.name,cls:S.cls,pts:0,first:0,done:{},answered:{}};save();launchSeq();};
+function confetti(){const c=["#41e8ff","#ff4fd8","#ffcf4a","#38e39b","#fff"];for(let i=0;i<70;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=c[i%5];d.style.animationDuration=(2+Math.random()*2.5)+"s";d.style.animationDelay=Math.random()*.6+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),5500);}}
+
+/* ---------- teacher ---------- */
+const getLog=()=>{try{return JSON.parse(localStorage.getItem(LOG))||[];}catch(e){return[];}};
+$("teacherBtn").onclick=()=>{$("m-teacher").classList.add("on");$("tLock").style.display="";$("tBody").style.display="none";$("pin").value="";};
+$("tClose").onclick=()=>$("m-teacher").classList.remove("on");
+$("pinOk").onclick=()=>{if($("pin").value!==PIN){$("pin").value="";$("pin").placeholder="Wrong PIN";return;}$("tLock").style.display="none";$("tBody").style.display="";paintLog();};
+function paintLog(){const l=getLog();$("tTable").innerHTML="<tr><th>Date</th><th>Name</th><th>Class</th><th>First-try stars</th><th>Points</th><th>Code</th></tr>"+l.map(r=>`<tr><td>${r.date}</td><td>${r.name}</td><td>${r.cls}</td><td>${r.first}/${r.total}</td><td>${r.pts}</td><td>${r.code}</td></tr>`).join("");}
+$("csvBtn").onclick=()=>{const l=getLog();const t="date,name,class,first_try,total,points,code\n"+l.map(r=>[r.date,r.name,r.cls,r.first,r.total,r.pts,r.code].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");navigator.clipboard&&navigator.clipboard.writeText(t);$("vRes").textContent="CSV copied";};
+$("clrBtn").onclick=()=>{if(confirm("Clear the logbook on this device?")){localStorage.removeItem(LOG);paintLog();}};
+$("vBtn").onclick=()=>{const code=$("vCode").value.trim().toUpperCase().replace(/^MS-/,"");const m=code.match(/^(\d+)-(\d+)-([0-9A-Z]+)$/);
+ if(!m){$("vRes").textContent="❌ Not a valid code";return;}const ok=makeCode($("vName").value,$("vCls").value,+m[1],+m[2])==="MS-"+code;
+ $("vRes").innerHTML=ok?`✅ Genuine: ${m[1]} first-try stars, ${m[2]} points`:"❌ Does not match this name and class";};
+$("nm").addEventListener("keydown",e=>{if(e.key==="Enter")$("launchBtn").click();});
+</script>
+</body>
+</html>
